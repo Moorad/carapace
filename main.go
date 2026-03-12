@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Moorad/carapace/ast"
+	"github.com/Moorad/carapace/interpreter"
 	"github.com/Moorad/carapace/lexer"
 )
 
@@ -17,7 +18,6 @@ func main() {
 	filePath := os.Args[1]
 
 	content, err := runFile(filePath)
-
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read %s:\n%v", filePath, err))
 	}
@@ -26,20 +26,19 @@ func main() {
 	scanner := lexer.NewScanner(source)
 
 	err = scanner.Scan()
-
 	if err != nil {
 		panic(fmt.Sprintf("Syntax Error:\n%v", err))
 	}
 
-	printer := ast.AstPrinter{}
-	parser := ast.Parser[string]{
+	// printer := ast.AstPrinter{}
+	parser := ast.Parser[any]{
 		Tokens: scanner.Tokens,
 	}
 
 	syntaxTree := parser.Parse()
+	intprtr := interpreter.Interpreter{}
 
-	println(syntaxTree.Accept(&printer))
-
+	println(syntaxTree.Accept(&intprtr))
 }
 
 func runFile(filePath string) ([]byte, error) {

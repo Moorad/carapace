@@ -5,8 +5,7 @@ import (
 	"strings"
 )
 
-type AstPrinter struct {
-}
+type AstPrinter struct{}
 
 func (p *AstPrinter) parenthesize(name string, exprs ...Expr[string]) string {
 	var str strings.Builder
@@ -22,19 +21,19 @@ func (p *AstPrinter) parenthesize(name string, exprs ...Expr[string]) string {
 	return str.String()
 }
 
-func (p *AstPrinter) visitBinary(expr *Binary[string]) string {
+func (p *AstPrinter) VisitBinary(expr *Binary[string]) string {
 	return p.parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right)
 }
 
-func (p *AstPrinter) visitUnary(expr *Unary[string]) string {
+func (p *AstPrinter) VisitUnary(expr *Unary[string]) string {
 	return p.parenthesize(expr.Operator.Lexeme, expr.Right)
 }
 
-func (p *AstPrinter) visitGrouping(expr *Grouping[string]) string {
+func (p *AstPrinter) VisitGrouping(expr *Grouping[string]) string {
 	return p.parenthesize("group", expr.Expression)
 }
 
-func (p *AstPrinter) visitLiteral(expr *Literal[string]) string {
+func (p *AstPrinter) VisitLiteral(expr *Literal[string]) string {
 	if expr.Value == nil {
 		return "null"
 	}

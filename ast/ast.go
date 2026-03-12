@@ -13,7 +13,7 @@ type Binary[T any] struct {
 }
 
 func (b *Binary[T]) Accept(v visitor[T]) T {
-	return v.visitBinary(b)
+	return v.VisitBinary(b)
 }
 
 type Unary[T any] struct {
@@ -22,7 +22,7 @@ type Unary[T any] struct {
 }
 
 func (u *Unary[T]) Accept(v visitor[T]) T {
-	return v.visitUnary(u)
+	return v.VisitUnary(u)
 }
 
 type Grouping[T any] struct {
@@ -30,7 +30,7 @@ type Grouping[T any] struct {
 }
 
 func (g *Grouping[T]) Accept(v visitor[T]) T {
-	return v.visitGrouping(g)
+	return v.VisitGrouping(g)
 }
 
 type Literal[T any] struct {
@@ -38,5 +38,5 @@ type Literal[T any] struct {
 }
 
 func (l *Literal[T]) Accept(v visitor[T]) T {
-	return v.visitLiteral(l)
+	return v.VisitLiteral(l)
 }

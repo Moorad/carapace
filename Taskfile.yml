@@ -2,14 +2,11 @@
 
 version: '3'
 
-vars:
-  GREETING: Hello, world!
-
 tasks:
   default:
-    desc: Print a greeting message
+    desc: Print out the list of available commands
     cmds:
-      - echo "{{.GREETING}}"
+      - task -l
     silent: true
   run:
     desc: Run application
