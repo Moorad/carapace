@@ -31,14 +31,11 @@ func main() {
 	}
 
 	// printer := ast.AstPrinter{}
-	parser := ast.Parser[any]{
-		Tokens: scanner.Tokens,
-	}
-
+	parser := ast.NewParser(scanner.Tokens)
 	syntaxTree := parser.Parse()
-	intprtr := interpreter.Interpreter{}
 
-	println(syntaxTree.Accept(&intprtr))
+	intprtr := interpreter.NewInterpreter()
+	intprtr.Interpret(syntaxTree)
 }
 
 func runFile(filePath string) ([]byte, error) {

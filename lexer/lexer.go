@@ -286,7 +286,7 @@ func (s *Scanner) parseNumber() {
 	}
 
 	num, _ := strconv.ParseFloat(s.Source[s.start:s.current], 32)
-	s.addLiteralToken(NUMBER, num)
+	s.addLiteralToken(NUMBER, float32(num))
 
 }
 

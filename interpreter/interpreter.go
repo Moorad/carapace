@@ -10,6 +10,10 @@ import (
 
 type Interpreter struct{}
 
+func NewInterpreter() Interpreter {
+	return Interpreter{}
+}
+
 func isTruthy(value any) bool {
 	if value == nil {
 		return false
@@ -26,7 +30,7 @@ func isEqual(left any, right any) bool {
 	return left == right
 }
 
-func assertUnaryIsNumber(right any, operator lexer.Token) float32 {
+func assertCastUnaryNumber(right any, operator lexer.Token) float32 {
 	if num, ok := right.(float32); ok {
 		return num
 	}
@@ -36,18 +40,23 @@ func assertUnaryIsNumber(right any, operator lexer.Token) float32 {
 	return 0.0
 }
 
-// func assertIsNumber(left any, right any, operator lexer.Token) (float32, float32) {
-// 	leftNum, isLeftOk := left.(float32)
-// 	rightNum, isRightOk := right.(float32)
-//
-// 	if isLeftOk && isRightOk {
-// 		return leftNum, rightNum
-// 	}
-//
-// 	utils.Error(operator.Line, fmt.Sprintf("value for %s operand must be both numbers", operator.Literal))
-//
-// 	return 0.0, 0.0
-// }
+func assertCastBinaryNumber(left any, right any, operator lexer.Token) (float32, float32) {
+	leftNum, isLeftOk := left.(float32)
+	rightNum, isRightOk := right.(float32)
+
+	if isLeftOk && isRightOk {
+		return leftNum, rightNum
+	}
+
+	utils.Error(operator.Line, fmt.Sprintf("value for %s operand must be both numbers", operator.Literal))
+
+	return 0.0, 0.0
+}
+
+func (i *Interpreter) Interpret(expr ast.Expr[any]) {
+	out := i.evaluate(expr)
+	println(stringify(out))
+}
 
 func (i *Interpreter) evaluate(expr ast.Expr[any]) any {
 	return expr.Accept(i)
@@ -68,7 +77,7 @@ func (i *Interpreter) VisitUnary(expr *ast.Unary[any]) any {
 	case lexer.BANG:
 		return !isTruthy(right)
 	case lexer.MINUS:
-		return -assertUnaryIsNumber(right, expr.Operator)
+		return -assertCastUnaryNumber(right, expr.Operator)
 	}
 
 	// Unreachable
@@ -81,23 +90,30 @@ func (i *Interpreter) VisitBinary(expr *ast.Binary[any]) any {
 
 	switch expr.Operator.Type {
 	case lexer.GREATER:
-		return left.(float32) > right.(float32)
+		left, right := assertCastBinaryNumber(left, right, expr.Operator)
+		return left > right
 	case lexer.GREATER_EQUAL:
-		return left.(float32) >= right.(float32)
+		left, right := assertCastBinaryNumber(left, right, expr.Operator)
+		return left >= right
 	case lexer.LESS:
-		return left.(float32) < right.(float32)
+		left, right := assertCastBinaryNumber(left, right, expr.Operator)
+		return left < right
 	case lexer.LESS_EQUAL:
-		return left.(float32) <= right.(float32)
+		left, right := assertCastBinaryNumber(left, right, expr.Operator)
+		return left <= right
 	case lexer.EQUAL_EQUAL:
 		return isEqual(left, right)
 	case lexer.BANG_EQUAL:
 		return !isEqual(left, right)
 	case lexer.MINUS:
-		return right.(float32) - left.(float32)
+		left, right := assertCastBinaryNumber(left, right, expr.Operator)
+		return left - right
 	case lexer.SLASH:
-		return right.(float32) / left.(float32)
+		left, right := assertCastBinaryNumber(left, right, expr.Operator)
+		return left / right
 	case lexer.STAR:
-		return right.(float32) * left.(float32)
+		left, right := assertCastBinaryNumber(left, right, expr.Operator)
+		return left * right
 	case lexer.PLUS:
 		leftNum, isLeftNum := left.(float32)
 		rightNum, isRightNum := right.(float32)
@@ -112,8 +128,18 @@ func (i *Interpreter) VisitBinary(expr *ast.Binary[any]) any {
 		if isLeftStr && isRightStr {
 			return leftStr + rightStr
 		}
+
+		utils.Error(expr.Operator.Line, "can only add two numbers or concatenate two strings but found different types")
 	}
 
 	// Unreachable
 	return nil
+}
+
+func stringify(t any) string {
+	if t == nil {
+		return "null"
+	}
+
+	return fmt.Sprint(t)
 }

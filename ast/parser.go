@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"slices"
+
 	"github.com/Moorad/carapace/lexer"
 	"github.com/Moorad/carapace/utils"
 )
@@ -10,12 +12,16 @@ type Parser[T any] struct {
 	current int
 }
 
+func NewParser(tokens []lexer.Token) Parser[any] {
+	return Parser[any]{
+		Tokens: tokens,
+	}
+}
+
 func (p *Parser[T]) match(tokens ...lexer.TokenType) bool {
-	for _, token := range tokens {
-		if p.check(token) {
-			p.advance()
-			return true
-		}
+	if slices.ContainsFunc(tokens, p.check) {
+		p.advance()
+		return true
 	}
 
 	return false
@@ -181,5 +187,4 @@ func (p *Parser[T]) primary() Expr[T] {
 
 	utils.Error(p.peek().Line, "Expected expression but was not found")
 	return &Literal[T]{}
-
 }
